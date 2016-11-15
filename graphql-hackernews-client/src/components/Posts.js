@@ -1,9 +1,10 @@
 import React, {Component} from 'react';
-import {List, ListItem} from 'material-ui/List';
-import Subheader from 'material-ui/Subheader';
 import {graphql} from 'react-apollo';
 import gql from 'graphql-tag';
 import CircularProgress from 'material-ui/CircularProgress';
+import {List} from 'semantic-ui-react'
+import FromNow from './FromNow';
+import {Segment} from 'semantic-ui-react'
 
 
 
@@ -12,6 +13,7 @@ const GET_POST_LISTS = gql`
         posts {
             id
             title
+            date
         }
     }
 `;
@@ -41,14 +43,21 @@ class Posts extends Component {
       return <CircularProgress size={80} thickness={5}/>
     }
 
-
     return (
-      <List>
-        <Subheader>Posts</Subheader>
-        {this.props.posts.map((post, idx)=> {
-          return <ListItem key={post.id} onClick={this.openPost.bind(this, post.id) } primaryText={post.title}/>
-        })}
-      </List>
+      <Segment padded>
+        <List divided relaxed>
+          {this.props.posts.map((post)=> {
+            return (
+              <List.Item key={post.id} onClick={this.openPost.bind(this, post.id)}>
+                <List.Content>
+                  <List.Header as='a'>{post.title}</List.Header>
+                  <List.Description as='a'><FromNow date={post.date}/></List.Description>
+                </List.Content>
+              </List.Item>
+            )
+          })}
+        </List>
+      </Segment>
     )
   }
 }

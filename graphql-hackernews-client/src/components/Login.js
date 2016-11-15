@@ -5,9 +5,11 @@ import RaisedButton from 'material-ui/RaisedButton';
 import {graphql} from 'react-apollo';
 import gql from 'graphql-tag';
 import {connect} from 'react-redux';
-import FlatButton from 'material-ui/FlatButton';
-
-
+import IconMenu from 'material-ui/IconMenu';
+import IconButton from 'material-ui/IconButton';
+import MenuItem from 'material-ui/MenuItem';
+import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
+import NewPost from './NewPost';
 
 
 
@@ -19,6 +21,33 @@ const AUTHENTICATE_MUTATION = gql`
         }
     }
 `;
+
+
+const Logged = ({username, handleLogout, onNewPost}) => (
+  <IconMenu
+    iconButtonElement={
+      <IconButton> <MoreVertIcon /></IconButton>
+    }
+    targetOrigin={{horizontal: 'right', vertical: 'top'}}
+    anchorOrigin={{horizontal: 'right', vertical: 'top'}}>
+    <MenuItem primaryText="New Post" onClick={onNewPost}/>
+    <MenuItem primaryText="Sign out" onClick={handleLogout}/>
+  </IconMenu>
+);
+
+Logged.propTypes = {
+  username: React.PropTypes.string.isRequired,
+  onNewPost: React.PropTypes.func.isRequired
+};
+
+const LoggetWithState = connect(
+  (state) => (state),
+  (dispatch) => ({
+    handleLogout(){
+      dispatch(logout());
+    }
+  }),
+)(Logged);
 
 
 const LoginForm = ({handleLogin}) => (
@@ -42,8 +71,6 @@ const LoginForm = ({handleLogin}) => (
 
 const LoginFormWithMutation = graphql(AUTHENTICATE_MUTATION, {
   props({ownProps, mutate}) {
-
-
     return {
       handleLogin({username, password}) {
         return mutate({
@@ -56,6 +83,13 @@ const LoginFormWithMutation = graphql(AUTHENTICATE_MUTATION, {
   },
 })(LoginForm);
 
+
+
+function logout() {
+  return {
+    type: 'LOGOUT',
+  }
+}
 
 function login(token) {
   return {
@@ -73,9 +107,10 @@ const LoginFormWithState = connect(
 )(LoginFormWithMutation);
 
 
-class LoginButton extends React.Component {
+class UserButton extends React.Component {
   state = {
     open: false,
+    newPost: false
   };
 
   handleOpen = () => {
@@ -86,13 +121,22 @@ class LoginButton extends React.Component {
     this.setState({open: false});
   };
 
+  handleOpenPost = () => {
+    this.setState({newPost: true});
+  };
+  handleClosePost = () => {
+
+    this.setState({newPost: false});
+  };
+
   render() {
 
 
     let LoginComponent;
 
-    if (this.props.currentUser.username) {
-      LoginComponent = (<FlatButton label={this.props.currentUser.username}/>);
+    let username = this.props.currentUser.username;
+    if (username) {
+      LoginComponent = <LoggetWithState username={username} onNewPost={this.handleOpenPost}/>
     } else {
       LoginComponent = (
         <div>
@@ -111,6 +155,14 @@ class LoginButton extends React.Component {
     return (
       <div>
         {LoginComponent}
+        <Dialog
+          title="New Post"
+          modal={false}
+          open={this.state.newPost}
+          onRequestClose={this.handleClosePost}
+          autoScrollBodyContent={true}>
+          <NewPost onComplete={this.handleClosePost}/>
+        </Dialog>
       </div>
     );
   }
@@ -119,6 +171,6 @@ class LoginButton extends React.Component {
 const LoginButtonrWithState = connect(
   (state) => ({currentUser: state.currentUser}),
   (dispatch) => ({}),
-)(LoginButton);
+)(UserButton);
 
 export default LoginButtonrWithState;
