@@ -1,0 +1,35 @@
+
+# A type that describe the user
+type User {
+    id : ID!
+	username : String!
+}
+
+type Post {
+	id : ID!
+	title : String!
+	body : String
+	author : User,
+	date : Date,
+	comments : [Comment]
+}
+
+type Comment {
+	id : ID!
+	body : String!
+	date : Date,
+	user : User,
+	replies : [Comment]
+}
+
+type UserToken {
+    username : String!
+    token : String!
+}
+
+scalar Date
+
+schema {
+	query: Query,
+	mutation : Mutation
+}

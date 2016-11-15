@@ -1,0 +1,8 @@
+# Root query object
+type Query {
+    postById(id : ID!): Post
+    posts(text : String): [Post]
+}
+
+
+
